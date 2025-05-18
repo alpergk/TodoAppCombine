@@ -104,4 +104,22 @@ final class TodoListViewModel {
             )
             .store(in: &cancellables)
     }
+    
+    func createTodo(title: String) {
+        error = nil
+        
+        repository.createTodo(title: title)
+            .receive(on: DispatchQueue.main)
+            .sink(
+                receiveCompletion: { [weak self] completion in
+                    if case .failure(let error) = completion {
+                        self?.error = error as? TodoError ?? .createError
+                    }
+                },
+                receiveValue: { [weak self] _ in
+                    self?.loadTodos()  // Reload to get updated list
+                }
+            )
+            .store(in: &cancellables)
+    }
 } 

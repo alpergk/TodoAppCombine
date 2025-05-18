@@ -1,3 +1,10 @@
+//
+//  TodoError.swift
+//  ToDoAppCombine
+//
+//  Created by Alper Gok on 18.05.2025.
+//
+
 import Foundation
 
 enum TodoError: LocalizedError {
