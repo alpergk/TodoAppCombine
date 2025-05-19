@@ -37,6 +37,7 @@ final class TodoRepository: TodoRepositoryProtocol {
         }.eraseToAnyPublisher()
     }
     
+    
     func createTodo(title: String) -> AnyPublisher<Todo, Error> {
         Future<Todo, Error> { promise in
             let todo = Todo(context: self.context)
@@ -84,7 +85,7 @@ final class TodoRepository: TodoRepositoryProtocol {
     func toggleTodo(_ todo: Todo) -> AnyPublisher<Todo, Error> {
         Future<Todo, Error> { promise in
             todo.isCompleted.toggle()
-            todo.updatedAt = Date()
+
             
             do {
                 try self.context.save()

@@ -11,6 +11,13 @@ final class TodoCell: UITableViewCell {
     // MARK: - Properties
     static let identifier = "TodoCell"
     
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter
+    }()
+    
     // MARK: - UI Components
     private lazy var checkmarkButton: UIButton = {
         let button = UIButton(type: .system)
@@ -46,6 +53,16 @@ final class TodoCell: UITableViewCell {
         return stack
     }()
     
+    private lazy var statusLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = .systemFont(ofSize: 12)
+        label.textColor = .secondaryLabel
+        label.adjustsFontSizeToFitWidth = true
+       
+        return label
+    }()
+    
     // MARK: - Initialization
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -61,9 +78,9 @@ final class TodoCell: UITableViewCell {
         selectionStyle = .none
         backgroundColor = .systemBackground
         
-       
         contentView.addSubview(checkmarkButton)
         contentView.addSubview(stackView)
+        contentView.addSubview(statusLabel)
         stackView.addArrangedSubview(titleLabel)
         stackView.addArrangedSubview(dateLabel)
         
@@ -77,33 +94,49 @@ final class TodoCell: UITableViewCell {
             stackView.leadingAnchor.constraint(equalTo: checkmarkButton.trailingAnchor, constant: 12),
             stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             stackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
-            stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12)
+            stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12),
+            
+            statusLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -50),
+            statusLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            statusLabel.widthAnchor.constraint(equalToConstant: 24),
+            statusLabel.heightAnchor.constraint(equalToConstant: 24)
+            
+            
         ])
     }
     
     // MARK: - Configuration
     func configure(with todo: Todo) {
-        let title = todo.title ?? "Untitled Todo"
-        checkmarkButton.isSelected = todo.isCompleted
+        let title = todo.title ?? ""
+        let date = todo.updatedAt ?? todo.createdAt ?? Date()
+
         
-       
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .medium
-        dateFormatter.timeStyle = .short
-        if let createdAt = todo.createdAt {
-            dateLabel.text = dateFormatter.string(from: createdAt)
+        if todo.isCompleted {
+            statusLabel.text = "Completed"
+            statusLabel.isHidden = false
+        } else if let updatedAt = todo.updatedAt, let createdAt = todo.createdAt, updatedAt != createdAt {
+            statusLabel.text = "Edited"
+            statusLabel.isHidden = false
         } else {
-            dateLabel.text = "No date"
+            statusLabel.isHidden = true
         }
         
-
         if todo.isCompleted {
-            titleLabel.attributedText = NSAttributedString(string: title)
-            titleLabel.text = title
+            let attributedString = NSAttributedString(
+                string: title,
+                attributes: [
+                    .strikethroughStyle: NSUnderlineStyle.single.rawValue,
+                    .strikethroughColor: UIColor.systemRed
+                ]
+            )
+            titleLabel.attributedText = attributedString
         } else {
             titleLabel.attributedText = nil
             titleLabel.text = title
         }
+        
+        dateLabel.text = dateFormatter.string(from: date)
+        checkmarkButton.isSelected = todo.isCompleted
     }
     
    
